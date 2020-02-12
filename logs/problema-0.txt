@@ -1,0 +1,165 @@
+#####
+# Bom dia pessoal, aqui está um exemplo de como provoquei o mesmo tipo de erro que encontramos
+# na reunião de terça feira, 11/02/2020, e como eu consegui contornar o problema sem ter que
+# ficar apelando pra opções tipo --force... eu achei essa dica pelo stackoverflow
+#
+# https://stackoverflow.com/questions/37937984/git-refusing-to-merge-unrelated-histories-on-rebase
+#
+# Segue abaixo o histórico do que fiz para causar o problema e para resolver.
+# Primeiro eu criei o projeto pela página do github, de cara ele criou dois arquivos.
+# Depois eu inicializei um repositório local, criei um arquivo, mudei de ideia antes de fazer o
+# primeiro commit, movi para outro diretório, fiz o commit local, adicionei a URL do repositório
+# remoto e tentei fazer o push. Desse ponto em diante é essencialmente o que aconteceu dia 11/02.
+#
+# Espero que isso ajude a ilustrar como lidar com esse tipo de problema.
+#####
+$ mkdir -p gcolombelli/caixa-de-areia
+$ cd gcolombelli/caixa-de-areia
+$ git init
+Initialized empty Git repository in /mnt/code/github/gcolombelli/caixa-de-areia/.git/
+$ vim receita-omelete.txt
+$ git add receita-omelete.txt
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+	new file:   receita-omelete.txt
+
+$ mkdir receitas
+$ cp receita-omelete.txt receitas/
+$ git rm receita-omelete.txt
+error: the following file has changes staged in the index:
+    receita-omelete.txt
+(use --cached to keep the file, or -f to force removal)
+$ git rm receita-omelete.txt --cached
+rm 'receita-omelete.txt'
+$ ls
+receita-omelete.txt  receitas
+$ git status
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	receita-omelete.txt
+	receitas/
+
+nothing added to commit but untracked files present (use "git add" to track)
+$ git add receitas
+$ git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+	new file:   receitas/receita-omelete.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	receita-omelete.txt
+
+$ rm receita-omelete.txt
+$ git commit -m "Adicionada pasta receitas com a primeira receita: omelete"
+[master (root-commit) fc356cf] Adicionada pasta receitas com a primeira receita: omelete
+ 1 file changed, 19 insertions(+)
+ create mode 100644 receitas/receita-omelete.txt
+$ git remote add origin https://github.com/gcolombelli/caixa-de-git.areia
+$ git push
+fatal: The current branch master has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin master
+
+$ git push --set-upstream origin master
+Username for 'https://github.com': gcolombelli
+Password for 'https://gcolombelli@github.com': 
+To https://github.com/gcolombelli/caixa-de-areia.git
+ ! [rejected]        master -> master (fetch first)
+error: failed to push some refs to 'https://github.com/gcolombelli/caixa-de-areia.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+$ git pull
+warning: no common commits
+remote: Enumerating objects: 7, done.
+remote: Counting objects: 100% (7/7), done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 7 (delta 1), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (7/7), done.
+From https://github.com/gcolombelli/caixa-de-areia
+ * [new branch]      master     -> origin/master
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/<branch> master
+
+$ git branch --set-upstream-to=origin/master master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+$ git pull
+fatal: refusing to merge unrelated histories
+$ git merge
+fatal: refusing to merge unrelated histories
+$ git merge --allow-unrelated-histories
+Merge made by the 'recursive' strategy.
+ LICENSE   | 24 ++++++++++++++++++++++++
+ README.md | 14 ++++++++++++++
+ 2 files changed, 38 insertions(+)
+ create mode 100644 LICENSE
+ create mode 100644 README.md
+$ ls
+LICENSE  README.md  receitas
+$ git log
+commit 063b1d982352073e04e23eb3dedbb2a0eb304dca (HEAD -> master)
+Merge: fc356cf 182a7ae
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Wed Feb 12 13:10:28 2020 -0400
+
+    Merge remote-tracking branch 'refs/remotes/origin/master'
+    
+    Isso é o que acontece quando se cria um repositório local, edita ele e tenta sincronizar com um repositório remoto.
+    O correto seria ter dado um clone no remoto antes de começar a trabalhar no local, mas eu queria saber se é possível recuperar desse tipo de erro.
+
+commit fc356cfc6d04551e936d076de2951f02e2c40c67
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Wed Feb 12 12:51:52 2020 -0400
+
+    Adicionada pasta receitas com a primeira receita: omelete
+
+commit 182a7ae14fe53e579151e9522b17a726c379d559 (origin/master)
+Author: Guilherme Colombelli <60948546+gcolombelli@users.noreply.github.com>
+Date:   Wed Feb 12 12:41:11 2020 -0400
+
+    README atualizado.
+
+commit a45a9040f59dc1202c727d045cf8b74a15468987
+Author: Guilherme Colombelli <60948546+gcolombelli@users.noreply.github.com>
+Date:   Wed Feb 12 12:23:37 2020 -0400
+
+    Initial commit
+
+$ git push
+Username for 'https://github.com': gcolombelli
+Password for 'https://gcolombelli@github.com': 
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (6/6), 1.05 KiB | 539.00 KiB/s, done.
+Total 6 (delta 0), reused 0 (delta 0)
+To https://github.com/gcolombelli/caixa-de-areia.git
+   182a7ae..063b1d9  master -> master
+
