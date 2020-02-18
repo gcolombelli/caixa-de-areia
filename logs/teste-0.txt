@@ -1,0 +1,174 @@
+# Resolvi modificar a receita de omelete pois sabia que o PX havia feito modificações e queria
+# testar o processo de merge, feito automaticamente ao rodar git pull.
+#
+# Como as modificações nao geraram conflito, o merge foi trivial.
+# Resolvi testar outras maneiras, reverter o commit, fazer fetch, diff, rebase, etc.
+#
+# Referências:
+# https://ohshitgit.com/
+# https://stackoverflow.com/questions/5817579/how-can-i-preview-a-merge-in-git
+# https://stackoverflow.com/questions/927358/how-do-i-undo-the-most-recent-local-commits-in-git
+# http://justcode.me/git/undo-git-commits/
+
+$ vim receitas/receita-omelete.txt
+$ git add receitas/receita-omelete.txt
+$ git commit -m "Ajustes na receita de omelete"
+[master 2939d7d] Ajustes na receita de omelete
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+$ git push
+Username for 'https://github.com': gcolombelli
+Password for 'https://gcolombelli@github.com': 
+To https://github.com/gcolombelli/caixa-de-areia.git
+ ! [rejected]        master -> master (fetch first)
+error: failed to push some refs to 'https://github.com/gcolombelli/caixa-de-areia.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+$ git pull
+remote: Enumerating objects: 7, done.
+remote: Counting objects: 100% (7/7), done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 4 (delta 2), reused 4 (delta 2), pack-reused 0
+Unpacking objects: 100% (4/4), done.
+From https://github.com/gcolombelli/caixa-de-areia
+   72b9f0c..4af5bc6  master     -> origin/master
+Auto-merging receitas/receita-omelete.txt
+hint: Waiting for your editor to close the file... ^C
+Merge made by the 'recursive' strategy.
+ receitas/receita-omelete.txt | 1 +
+ 1 file changed, 1 insertion(+)
+^C
+$ less receitas/receita-omelete.txt
+$ git log -n 3
+commit c134a62e3d77526c667584783a98c5a9f3f0f499 (HEAD -> master)
+Merge: 2939d7d 4af5bc6
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 07:39:36 2020 -0400
+
+    Merge branch 'master' of https://github.com/gcolombelli/caixa-de-areia
+
+commit 2939d7d3f89058e885bbb5c753a6cedeed75ae00
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 07:36:30 2020 -0400
+
+    Ajustes na receita de omelete
+
+commit 4af5bc67c3b5a09d24ddb65678501b865e297956 (origin/master)
+Author: rogeriopx <rogeriopx@gmail.com>
+Date:   Mon Feb 17 10:21:20 2020 -0400
+
+    Inclusão de milho a receita
+$ git commit --amend
+[master 89bae04] Merge branch 'master' of https://github.com/gcolombelli/caixa-de-areia
+ Date: Tue Feb 18 07:39:36 2020 -0400
+$ git log -n 2
+commit 89bae048f9bea0d311ce973e36ad556e31c013a4 (HEAD -> master)
+Merge: 2939d7d 4af5bc6
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 07:39:36 2020 -0400
+
+    Merge branch 'master' of https://github.com/gcolombelli/caixa-de-areia
+    
+    Alterando um arquivo alterado antes de fazer pull para ver o que acontece.
+
+commit 2939d7d3f89058e885bbb5c753a6cedeed75ae00
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 07:36:30 2020 -0400
+
+    Ajustes na receita de omelete
+$ git reset 2939d7d3f89058e885bbb5c753a6cedeed75ae00
+Unstaged changes after reset:
+M	receitas/receita-omelete.txt
+$ git diff
+diff --git a/receitas/receita-omelete.txt b/receitas/receita-omelete.txt
+index 7b8e372..eebfe27 100644
+--- a/receitas/receita-omelete.txt
++++ b/receitas/receita-omelete.txt
+@@ -7,6 +7,7 @@ Ingredientes:
+ -azeitonas
+ -presunto
+ -cebola
++-milho
+ 
+ Preparo:
+ -bata os ovos
+$ git diff origin/master
+diff --git a/receitas/receita-omelete.txt b/receitas/receita-omelete.txt
+index 7593733..7b8e372 100644
+--- a/receitas/receita-omelete.txt
++++ b/receitas/receita-omelete.txt
+@@ -3,18 +3,18 @@
+ Ingredientes:
+ -ovos
+ -queijo
+--tomate
++-tomate cereja
+ -azeitonas
+ -presunto
+ -cebola
+--milho
+ 
+ Preparo:
+ -bata os ovos
+ -corte a cebola, tomate, queijo e presunto
+ -se as azeitonas tiverem caroço, tire os caroços
+ -tempere com orégano, sal, pimenta calabresa, o que você gostar
+--coloque na frigideira e até começar a ficar firme, vire a omelete
++-coloque os ingredientes na frigideira
++-quando começar a ficar firme, vire a omelete
+ -quando o outro lado ficar firme, é só servir e comer
+ -alternativa: faça na airfryer, não precisa virar a omelete e fica muito gostoso
+$ git log -n 3
+commit 3b0ebc67940346a56bcbc4f6095762679657556d (HEAD -> master)
+Merge: 2939d7d 4af5bc6
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 08:49:02 2020 -0400
+
+    Merge remote-tracking branch 'origin/master'
+    
+    Teste de merge manual (não pull) depois de modificar a receita de omelete.
+
+commit 2939d7d3f89058e885bbb5c753a6cedeed75ae00
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 07:36:30 2020 -0400
+
+    Ajustes na receita de omelete
+
+commit 4af5bc67c3b5a09d24ddb65678501b865e297956 (origin/master)
+Author: rogeriopx <rogeriopx@gmail.com>
+Date:   Mon Feb 17 10:21:20 2020 -0400
+
+    Inclusão de milho a receita
+$ less receitas/receita-omelete.txt
+$ git reset --hard 2939d7d3f89058e885bbb5c753a6cedeed75ae00
+HEAD is now at 2939d7d Ajustes na receita de omelete
+$ git rebase origin/master 
+First, rewinding head to replay your work on top of it...
+Applying: Ajustes na receita de omelete
+$ less receitas/receita-omelete.txt
+$ git log -n 2
+commit 9b033a4cfb9ea0a04c88e77184744bb23cb45c13 (HEAD -> master)
+Author: Guilherme Colombelli <gcolombelli@gmail.com>
+Date:   Tue Feb 18 07:36:30 2020 -0400
+
+    Ajustes na receita de omelete
+
+commit 4af5bc67c3b5a09d24ddb65678501b865e297956 (origin/master)
+Author: rogeriopx <rogeriopx@gmail.com>
+Date:   Mon Feb 17 10:21:20 2020 -0400
+
+    Inclusão de milho a receita
+$ git push
+Username for 'https://github.com': gcolombelli
+Password for 'https://gcolombelli@github.com': 
+Counting objects: 4, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 413 bytes | 413.00 KiB/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/gcolombelli/caixa-de-areia.git
+   4af5bc6..9b033a4  master -> master
+
