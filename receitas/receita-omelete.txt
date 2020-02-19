@@ -9,6 +9,8 @@ Ingredientes:
 -cebola
 -milho
 -alho
+-cebola
+
 Preparo:
 -bata os ovos
 -corte a cebola, tomate, queijo e presunto
